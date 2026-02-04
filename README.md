@@ -2,7 +2,11 @@
 
 ShopMate is an intelligent, conversational shopping assistant aimed at transforming the e-commerce experience. By leveraging the power of Google's Gemini AI and Algolia's high-speed search, ShopMate allows users to find products, compare options, and explore categories using natural language.
 
-![ShopMate Demo](https://placehold.co/1200x600?text=ShopMate+Interface)
+### ShopMate Demo
+
+https://github.com/user-attachments/assets/f0750789-fffa-4de9-9490-56d7b5ebe8d2
+
+
 
 ## 🎯 Goal
 
