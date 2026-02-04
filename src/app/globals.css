@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -94,6 +95,34 @@
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+}
+
+/* Custom markdown styles for chat messages */
+.prose-chat {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.prose-chat strong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.prose-chat p {
+  margin: 0.25em 0;
+}
+
+.prose-chat ul, .prose-chat ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.prose-chat li {
+  margin: 0.125em 0;
+}
+
+.prose-chat li p {
+  margin: 0;
 }
 
 /* Premium scrollbar */

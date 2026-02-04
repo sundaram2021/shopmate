@@ -104,7 +104,7 @@ export async function POST(req: Request) {
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text }],
       };
-    }).filter((msg: { parts: { text: string }[] }) => msg.parts[0].text);
+    }).filter((msg: { parts: { text: string }[] }) => msg.parts[0].text && msg.parts[0].text.trim() !== '');
 
     // Get the last user message
     const lastMessage = messages[messages.length - 1];
@@ -116,6 +116,14 @@ export async function POST(req: Request) {
         .join('');
     } else if (typeof lastMessage.content === 'string') {
       userText = lastMessage.content;
+    }
+
+    // Validate that we have user input
+    if (!userText || userText.trim() === '') {
+      return NextResponse.json(
+        { error: 'No user message provided', text: 'Please provide a message.' },
+        { status: 400 }
+      );
     }
 
     const model = genAI.getGenerativeModel({

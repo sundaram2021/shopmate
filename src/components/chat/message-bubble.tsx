@@ -4,6 +4,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { TypingIndicator } from '@/components/ui/typing-indicator';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import Markdown from 'react-markdown';
 
 interface MessageBubbleProps {
     role: 'user' | 'assistant';
@@ -33,7 +34,14 @@ export function MessageBubble({ role, content, children }: MessageBubbleProps) {
                                     : 'bg-card text-card-foreground border border-border'
                             )}
                         >
-                            <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{content}</p>
+                            <div className={cn(
+                                'prose prose-sm max-w-none prose-chat',
+                                isUser
+                                    ? 'prose-p:text-primary-foreground prose-strong:text-primary-foreground'
+                                    : 'dark:prose-invert'
+                            )}>
+                                <Markdown>{content}</Markdown>
+                            </div>
                         </div>
                     )}
                     {children}
