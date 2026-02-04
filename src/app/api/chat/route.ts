@@ -90,7 +90,13 @@ export async function POST(req: Request) {
       content?: string;
     }
 
-    const history = messages.slice(0, -1).map((msg: InputMessage) => {
+    interface GeminiMessage {
+      role: 'user' | 'model';
+      parts: { text: string }[];
+    }
+
+    // Build history from previous messages (excluding the last one which is the current user message)
+    const rawHistory = messages.slice(0, -1).map((msg: InputMessage) => {
       let text = '';
       if (msg.parts && Array.isArray(msg.parts)) {
         text = msg.parts
@@ -101,10 +107,34 @@ export async function POST(req: Request) {
         text = msg.content;
       }
       return {
-        role: msg.role === 'user' ? 'user' : 'model',
+        role: (msg.role === 'user' ? 'user' : 'model') as 'user' | 'model',
         parts: [{ text }],
       };
-    }).filter((msg: { parts: { text: string }[] }) => msg.parts[0].text && msg.parts[0].text.trim() !== '');
+    }).filter((msg: GeminiMessage) => msg.parts[0].text && msg.parts[0].text.trim() !== '');
+
+    // Ensure history has strictly alternating roles (Gemini requirement)
+    // Also ensure history starts with 'user' role
+    const history: GeminiMessage[] = [];
+    let lastRole: 'user' | 'model' | null = null;
+    
+    for (const msg of rawHistory) {
+      // Skip if same role as previous (merge or skip)
+      if (msg.role === lastRole) {
+        // If same role, append to last message instead of adding new one
+        if (history.length > 0) {
+          history[history.length - 1].parts[0].text += '\n' + msg.parts[0].text;
+        }
+        continue;
+      }
+      
+      // If first message and it's 'model', skip it (history must start with 'user')
+      if (history.length === 0 && msg.role === 'model') {
+        continue;
+      }
+      
+      history.push(msg);
+      lastRole = msg.role;
+    }
 
     // Get the last user message
     const lastMessage = messages[messages.length - 1];
@@ -125,6 +155,15 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    // Ensure history ends with 'model' role (so next user message works)
+    // If history ends with 'user', we need to remove that last user message since
+    // we're about to send a new user message
+    if (history.length > 0 && history[history.length - 1].role === 'user') {
+      history.pop();
+    }
+
+    console.log('[ShopMate] History length:', history.length);
 
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash',
